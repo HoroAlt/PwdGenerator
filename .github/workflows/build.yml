@@ -25,7 +25,7 @@ jobs:
     
     - name: Build Windows exe with all dependencies
       run: |
-        pyinstaller --onedir --noconsole --name="PwdGenerator" --add-data ".:." --hidden-import=PyQt5.QtCore --hidden-import=PyQt5.QtGui --hidden-import=PyQt5.QtWidgets --collect-all PyQt5 PwdGenGui.py
+        pyinstaller --onedir --noconsole --name="PwdGenerator" --hidden-import=PyQt5.QtCore --hidden-import=PyQt5.QtGui --hidden-import=PyQt5.QtWidgets --collect-all PyQt5 PwdGenGui.py
     
     - name: Create archive
       run: |
@@ -54,11 +54,19 @@ jobs:
         pip install --upgrade pip
         pip install pyqt5 pyinstaller
     
-    - name: Build macOS app with all dependencies
+    - name: Build macOS app
       run: |
-        pyinstaller --onedir --windowed --name="PwdGenerator" --add-data ".:." --collect-all PyQt5 PwdGenGui.py
+        pyinstaller --onefile --windowed --name="PwdGenerator" \
+        --hidden-import=PyQt5.QtCore \
+        --hidden-import=PyQt5.QtGui \
+        --hidden-import=PyQt5.QtWidgets \
+        --exclude-module=PyQt5.QtBluetooth \
+        --exclude-module=PyQt5.QtNfc \
+        --exclude-module=PyQt5.QtWebEngine \
+        --exclude-module=PyQt5.QtWebEngineWidgets \
+        PwdGenGui.py
     
-    - name: Create DMG or ZIP
+    - name: Create ZIP
       run: |
         cd dist
         zip -r ../PwdGenerator-macOS.zip PwdGenerator.app
@@ -93,7 +101,7 @@ jobs:
     
     - name: Build Linux app with all dependencies
       run: |
-        pyinstaller --onedir --windowed --name="PwdGenerator" --add-data ".:." --collect-all PyQt5 PwdGenGui.py
+        pyinstaller --onedir --windowed --name="PwdGenerator" --collect-all PyQt5 PwdGenGui.py
     
     - name: Create archive
       run: |
