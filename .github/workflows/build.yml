@@ -20,17 +20,22 @@ jobs:
     
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install pyqt5 pyinstaller
     
-    - name: Build Windows exe
+    - name: Build Windows exe with all dependencies
       run: |
-        pyinstaller --onefile --windowed --name="PwdGenerator" PwdGenGui.py
+        pyinstaller --onedir --noconsole --name="PwdGenerator" --add-data ".:." --hidden-import=PyQt5.QtCore --hidden-import=PyQt5.QtGui --hidden-import=PyQt5.QtWidgets --collect-all PyQt5 PwdGenGui.py
     
-    - name: Upload Windows exe
+    - name: Create archive
+      run: |
+        Compress-Archive -Path dist/PwdGenerator/* -DestinationPath PwdGenerator-Windows.zip
+    
+    - name: Upload Windows app
       uses: actions/upload-artifact@v4
       with:
         name: PwdGenerator-Windows
-        path: dist/PwdGenerator.exe
+        path: PwdGenerator-Windows.zip
 
   build-macos:
     runs-on: macos-latest
@@ -46,17 +51,23 @@ jobs:
     
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install pyqt5 pyinstaller
     
-    - name: Build macOS app
+    - name: Build macOS app with all dependencies
       run: |
-        pyinstaller --onefile --windowed --name="PwdGenerator" PwdGenGui.py
+        pyinstaller --onedir --windowed --name="PwdGenerator" --add-data ".:." --collect-all PyQt5 PwdGenGui.py
+    
+    - name: Create DMG or ZIP
+      run: |
+        cd dist
+        zip -r ../PwdGenerator-macOS.zip PwdGenerator.app
     
     - name: Upload macOS app
       uses: actions/upload-artifact@v4
       with:
         name: PwdGenerator-macOS
-        path: dist/PwdGenerator.app
+        path: PwdGenerator-macOS.zip
 
   build-linux:
     runs-on: ubuntu-latest
@@ -73,18 +84,24 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1 libxkbcommon-x11-0 libdbus-1-3 libxcb-xinerama0 libxcb-cursor0
+        sudo apt-get install -y libgl1 libxkbcommon-x11-0 libdbus-1-3 libxcb-xinerama0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0
     
     - name: Install Python dependencies
       run: |
+        pip install --upgrade pip
         pip install pyqt5 pyinstaller
     
-    - name: Build Linux app
+    - name: Build Linux app with all dependencies
       run: |
-        pyinstaller --onefile --windowed --name="PwdGenerator" PwdGenGui.py
+        pyinstaller --onedir --windowed --name="PwdGenerator" --add-data ".:." --collect-all PyQt5 PwdGenGui.py
+    
+    - name: Create archive
+      run: |
+        cd dist
+        tar -czf ../PwdGenerator-Linux.tar.gz PwdGenerator/
     
     - name: Upload Linux app
       uses: actions/upload-artifact@v4
       with:
         name: PwdGenerator-Linux
-        path: dist/PwdGenerator
+        path: PwdGenerator-Linux.tar.gz
